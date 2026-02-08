@@ -86,6 +86,7 @@ if (window.queensSolverLoaded) {
         });
     }
 
+
     function clickSolution(solution, area, gridSize) {
         const cellWidth = area.width / gridSize;
         const cellHeight = area.height / gridSize;
