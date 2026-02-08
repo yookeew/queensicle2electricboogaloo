@@ -86,7 +86,7 @@ if (window.queensSolverLoaded) {
         });
     }
 
-
+/**
     function clickSolution(solution, area, gridSize) {
         const cellWidth = area.width / gridSize;
         const cellHeight = area.height / gridSize;
@@ -103,6 +103,130 @@ if (window.queensSolverLoaded) {
                 }
             }, index * 1000);
         });
+    }**/
+
+    function isPurple(r, g, b) {
+        // Target color: #724d97 (114, 77, 151)
+        const targetR = 114;
+        const targetG = 77;
+        const targetB = 151;
+        const buffer = 30; // Color tolerance
+
+        return Math.abs(r - targetR) <= buffer &&
+               Math.abs(g - targetG) <= buffer &&
+               Math.abs(b - targetB) <= buffer;
+    }
+
+    function checkForWin(area, gridSize) {
+        const cellWidth = area.width / gridSize;
+        const cellHeight = area.height / gridSize;
+
+        const checkCells = [[1, 1], [2, 3], [3, 4]];
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        return new Promise((resolve) => {
+            // Capture current screen state
+            chrome.runtime.sendMessage({ action: 'capture' }, (response) => {
+                const img = new Image();
+                img.onload = () => {
+                    const dpr = window.devicePixelRatio || 1;
+                    const scrollX = window.scrollX;
+                    const scrollY = window.scrollY;
+
+                    canvas.width = area.width * dpr;
+                    canvas.height = area.height * dpr;
+
+                    const sx = (area.left - scrollX) * dpr;
+                    const sy = (area.top - scrollY) * dpr;
+
+                    ctx.drawImage(img, sx, sy, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+
+                    // Check each cell
+                    for (const [row, col] of checkCells) {
+                        const x = Math.floor((col * cellWidth + cellWidth / 2) * dpr);
+                        const y = Math.floor((row * cellHeight + cellHeight / 2) * dpr);
+
+                        const pixel = ctx.getImageData(x, y, 1, 1).data;
+                        if (isPurple(pixel[0], pixel[1], pixel[2])) {
+                            resolve(true);
+                            return;
+                        }
+                    }
+                    resolve(false);
+                };
+                img.src = response.imageData;
+            });
+        });
+    }
+
+    function showSolutionOverlay(solution, area, gridSize) {
+        const cellWidth = area.width / gridSize;
+        const cellHeight = area.height / gridSize;
+
+        // Create overlay container
+        const overlay = document.createElement('div');
+        overlay.id = 'queens-solution-overlay';
+        overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999998;';
+        document.body.appendChild(overlay);
+
+        // Add circles for each queen
+        solution.forEach(([row, col]) => {
+            const x = area.left + col * cellWidth + cellWidth / 2;
+            const y = area.top + row * cellHeight + cellHeight / 2;
+
+            const circle = document.createElement('div');
+            circle.style.cssText = `
+                position: absolute;
+                left: ${x}px;
+                top: ${y}px;
+                width: ${Math.min(cellWidth, cellHeight) * 0.8}px;
+                height: ${Math.min(cellWidth, cellHeight) * 0.8}px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.7);
+                border: 3px solid white;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+            `;
+            overlay.appendChild(circle);
+        });
+
+        // Add dismiss button
+        const dismissBtn = document.createElement('button');
+        dismissBtn.textContent = 'Clear Solution';
+        dismissBtn.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999999;
+            padding: 12px 20px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            pointer-events: auto;
+        `;
+
+        const cleanup = () => {
+            overlay.remove();
+            dismissBtn.remove();
+            clearInterval(winCheckInterval);
+        };
+
+        dismissBtn.onclick = cleanup;
+        document.body.appendChild(dismissBtn);
+
+        // Check for win every second
+        const winCheckInterval = setInterval(async () => {
+            const won = await checkForWin(area, gridSize);
+            if (won) {
+                console.log('Player won! Clearing overlay.');
+                cleanup();
+            }
+        }, 200);
     }
 
     async function solvePuzzle() {
@@ -125,7 +249,7 @@ if (window.queensSolverLoaded) {
             console.log('Solution:', solution);
 
             if (solution) {
-                clickSolution(solution, area, config.gridSize);
+                showSolutionOverlay(solution, area, config.gridSize);
             } else {
                 alert('No solution found!');
             }
