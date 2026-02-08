@@ -47,11 +47,3 @@ function parseQueensBoard(imageData, gridSize = 7, area = null) {
         };
     });
 }
-
-function captureScreenshot() {
-    return new Promise((resolve) => {
-        chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
-            resolve(dataUrl);
-        });
-    });
-}
