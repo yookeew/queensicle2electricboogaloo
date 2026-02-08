@@ -1,15 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <style>
-        body { width: 250px; padding: 15px; font-family: Arial; }
-        button { width: 100%; padding: 10px; margin-top: 10px; }
-        label { display: block; margin-top: 10px; }
-        input { width: 100%; padding: 5px; box-sizing: border-box; }
+        /* Dark Theme */
+        body {
+            width: 250px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+        }
+
+        h3 {
+            color: #4c81fc; /* standout title */
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="number"],
+        input[type="range"] {
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+            background-color: #333;
+            color: #f0f0f0;
+            border: 1px solid #555;
+            border-radius: 4px;
+        }
+
+        #thresholdVal {
+            margin-left: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #444;
+            color: #f0f0f0;
+            border: 1px solid #666;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        #quotes_title {
+            margin-top: 15px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            text-align: center;
+            color: #4c81fc;
+        }
+
+        #quotes {
+            font-style: italic;
+            font-family: "Georgia", "Times New Roman", serif;
+            text-align: center;
+            margin-top: 12px;
+            opacity: 0.9;
+            color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
-<h3>Queens Solver</h3>
+<h3>Linkedin Queens Solver</h3>
 
 <label>Board Size (NxN):</label>
 <input type="number" id="gridSize" value="7" min="4" max="12">
@@ -20,6 +83,9 @@
 
 <button id="solveBtn">Solve Puzzle</button>
 
+<label id="quotes_title">Linkedin networking grindset affirmations:</label>
+<label id="quotes">"Built in silence, moved in strength 🔥"</label>
+<button id="quoteBtn">I need more!!</button>
 <script src="popup.js"></script>
 </body>
 </html>

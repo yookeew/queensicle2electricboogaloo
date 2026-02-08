@@ -86,6 +86,24 @@ if (window.queensSolverLoaded) {
         });
     }
 
+    function clickSolution(solution, area, gridSize) {
+        const cellWidth = area.width / gridSize;
+        const cellHeight = area.height / gridSize;
+
+        solution.forEach(([row, col], index) => {
+            setTimeout(() => {
+                const x = area.left + col * cellWidth + cellWidth / 2;
+                const y = area.top + row * cellHeight + cellHeight / 2;
+
+                const element = document.elementFromPoint(x - window.scrollX, y - window.scrollY);
+                if (element) {
+                    element.click();
+                    console.log(`Clicked cell (${row}, ${col}) at position (${x}, ${y})`);
+                }
+            }, index * 1000);
+        });
+    }
+
     async function solvePuzzle() {
         console.log('solvePuzzle started');
         console.log('Config:', config);
@@ -105,7 +123,11 @@ if (window.queensSolverLoaded) {
             const solution = solveQueens(board);
             console.log('Solution:', solution);
 
-            alert('Solution: ' + JSON.stringify(solution));
+            if (solution) {
+                clickSolution(solution, area, config.gridSize);
+            } else {
+                alert('No solution found!');
+            }
         });
     }
 
