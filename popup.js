@@ -6,7 +6,7 @@ document.getElementById('solveBtn').addEventListener('click', async () => {
 
     await chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        files: ['solver.js', 'content.js']
+        files: ['vision.js', 'solver.js', 'content.js'] // Add vision.js here
     });
 
     console.log('Script injected');

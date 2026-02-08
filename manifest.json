@@ -4,6 +4,7 @@
   "version": "1.0",
   "description": "Solves LinkedIn Queens puzzles",
   "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup.html"
   }
