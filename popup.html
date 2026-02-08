@@ -2,13 +2,24 @@
 <html>
 <head>
     <style>
-        body { width: 200px; padding: 10px; }
-        button { width: 100%; padding: 10px; }
+        body { width: 250px; padding: 15px; font-family: Arial; }
+        button { width: 100%; padding: 10px; margin-top: 10px; }
+        label { display: block; margin-top: 10px; }
+        input { width: 100%; padding: 5px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 <h3>Queens Solver</h3>
+
+<label>Board Size (NxN):</label>
+<input type="number" id="gridSize" value="7" min="4" max="12">
+
+<label>Color Threshold:</label>
+<input type="range" id="threshold" min="20" max="80" value="40">
+<span id="thresholdVal">40</span>
+
 <button id="solveBtn">Solve Puzzle</button>
+
 <script src="popup.js"></script>
 </body>
 </html>

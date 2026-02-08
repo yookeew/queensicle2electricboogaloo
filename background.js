@@ -3,6 +3,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
             sendResponse({ imageData: dataUrl });
         });
-        return true; // Keep channel open for async response
+        return true;
     }
 });
