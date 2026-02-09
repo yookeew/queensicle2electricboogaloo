@@ -6,7 +6,28 @@ if (window.queensSolverLoaded) {
 } else {
     window.queensSolverLoaded = true;
     
-    const config = window.queensConfig || { gridSize: 7, threshold: 40 };
+    const config = window.queensConfig || { gridSize: null, threshold: 40 };
+
+    function detectBoard() {
+        const board = document.querySelector('.board');
+        if (!board) return null;
+
+        // Get grid size from CSS
+        const gridCols = getComputedStyle(board).gridTemplateColumns;
+        const gridSize = gridCols.trim().split(/\s+/).length;
+
+        // Get board position and size
+        const rect = board.getBoundingClientRect();
+        const area = {
+            left: rect.left + window.scrollX,
+            top: rect.top + window.scrollY,
+            width: rect.width,
+            height: rect.height
+        };
+
+        console.log('Auto-detected board:', area, 'Grid size:', gridSize);
+        return { area, gridSize };
+    }
 
     function selectArea() {
         return new Promise((resolve) => {
@@ -233,8 +254,20 @@ if (window.queensSolverLoaded) {
         console.log('solvePuzzle started');
         console.log('Config:', config);
 
-        const area = await selectArea();
-        console.log('Selected area:', area);
+        // Try to auto-detect board first
+        let boardData = detectBoard();
+        let area, gridSize;
+
+        if (boardData) {
+            area = boardData.area;
+            gridSize = boardData.gridSize;
+            console.log('Using auto-detected board');
+        } else {
+            console.log('Board not found, asking user to select manually');
+            area = await selectArea();
+            gridSize = config.gridSize || 7; // Fallback to config or 7
+            console.log('Manual selection:', area);
+        }
 
         chrome.runtime.sendMessage({ action: 'capture' }, async (response) => {
             console.log('Screenshot received');
@@ -242,14 +275,14 @@ if (window.queensSolverLoaded) {
             const cropped = await cropToSelection(response.imageData, area);
             console.log('Cropped');
 
-            const board = await parseQueensBoard(cropped, config.gridSize, config.threshold);
+            const board = await parseQueensBoard(cropped, gridSize, config.threshold);
             console.log('Parsed board:', board);
 
             const solution = solveQueens(board);
             console.log('Solution:', solution);
 
             if (solution) {
-                showSolutionOverlay(solution, area, config.gridSize);
+                showSolutionOverlay(solution, area, gridSize);
             } else {
                 alert('No solution found!');
             }
