@@ -1,22 +1,15 @@
-console.log('Content script loaded!');
+(function() {
+    console.log('Content script loaded!');
 
-// Prevent multiple injections
-if (window.queensSolverLoaded) {
-    console.log('Already loaded, skipping');
-} else {
-    window.queensSolverLoaded = true;
-    
     const config = window.queensConfig || { gridSize: null, threshold: 40 };
 
     function detectBoard() {
         const board = document.querySelector('.board');
         if (!board) return null;
 
-        // Get grid size from CSS
         const gridCols = getComputedStyle(board).gridTemplateColumns;
         const gridSize = gridCols.trim().split(/\s+/).length;
 
-        // Get board position and size
         const rect = board.getBoundingClientRect();
         const area = {
             left: rect.left + window.scrollX,
@@ -107,7 +100,7 @@ if (window.queensSolverLoaded) {
         });
     }
 
-/**
+    /**
     function clickSolution(solution, area, gridSize) {
         const cellWidth = area.width / gridSize;
         const cellHeight = area.height / gridSize;
@@ -127,11 +120,10 @@ if (window.queensSolverLoaded) {
     }**/
 
     function isPurple(r, g, b) {
-        // Target color: #724d97 (114, 77, 151)
         const targetR = 114;
         const targetG = 77;
         const targetB = 151;
-        const buffer = 30; // Color tolerance
+        const buffer = 30;
 
         return Math.abs(r - targetR) <= buffer &&
                Math.abs(g - targetG) <= buffer &&
@@ -148,7 +140,6 @@ if (window.queensSolverLoaded) {
         const ctx = canvas.getContext('2d');
 
         return new Promise((resolve) => {
-            // Capture current screen state
             chrome.runtime.sendMessage({ action: 'capture' }, (response) => {
                 const img = new Image();
                 img.onload = () => {
@@ -164,7 +155,6 @@ if (window.queensSolverLoaded) {
 
                     ctx.drawImage(img, sx, sy, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
 
-                    // Check each cell
                     for (const [row, col] of checkCells) {
                         const x = Math.floor((col * cellWidth + cellWidth / 2) * dpr);
                         const y = Math.floor((row * cellHeight + cellHeight / 2) * dpr);
@@ -186,13 +176,11 @@ if (window.queensSolverLoaded) {
         const cellWidth = area.width / gridSize;
         const cellHeight = area.height / gridSize;
 
-        // Create overlay container
         const overlay = document.createElement('div');
         overlay.id = 'queens-solution-overlay';
         overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999998;';
         document.body.appendChild(overlay);
 
-        // Add circles for each queen
         solution.forEach(([row, col]) => {
             const x = area.left + col * cellWidth + cellWidth / 2;
             const y = area.top + row * cellHeight + cellHeight / 2;
@@ -213,7 +201,6 @@ if (window.queensSolverLoaded) {
             overlay.appendChild(circle);
         });
 
-        // Add dismiss button
         const dismissBtn = document.createElement('button');
         dismissBtn.textContent = 'Clear Solution';
         dismissBtn.style.cssText = `
@@ -240,7 +227,6 @@ if (window.queensSolverLoaded) {
         dismissBtn.onclick = cleanup;
         document.body.appendChild(dismissBtn);
 
-        // Check for win every second
         const winCheckInterval = setInterval(async () => {
             const won = await checkForWin(area, gridSize);
             if (won) {
@@ -251,10 +237,17 @@ if (window.queensSolverLoaded) {
     }
 
     async function solvePuzzle() {
+        const existingOverlay = document.getElementById('queens-solution-overlay');
+        if (existingOverlay) existingOverlay.remove();
+
+        const existingBtns = document.querySelectorAll('button');
+        existingBtns.forEach(btn => {
+            if (btn.textContent === 'Clear Solution') btn.remove();
+        });
+
         console.log('solvePuzzle started');
         console.log('Config:', config);
 
-        // Try to auto-detect board first
         let boardData = detectBoard();
         let area, gridSize;
 
@@ -265,7 +258,7 @@ if (window.queensSolverLoaded) {
         } else {
             console.log('Board not found, asking user to select manually');
             area = await selectArea();
-            gridSize = config.gridSize || 7; // Fallback to config or 7
+            gridSize = config.gridSize || 7;
             console.log('Manual selection:', area);
         }
 
@@ -284,10 +277,10 @@ if (window.queensSolverLoaded) {
             if (solution) {
                 showSolutionOverlay(solution, area, gridSize);
             } else {
-                alert('No solution found!');
+                alert('No solution found! Try lowering color threshold?');
             }
         });
     }
 
     solvePuzzle();
-}
+})();
