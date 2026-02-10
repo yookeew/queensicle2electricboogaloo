@@ -1,7 +1,7 @@
 (function() {
     console.log('Content script loaded!');
 
-    const config = window.queensConfig || { gridSize: null, threshold: 40 };
+    const config = window.queensConfig || { gridSize: null, threshold: 20 };
 
     function detectBoard() {
         const board = document.querySelector('.board');
