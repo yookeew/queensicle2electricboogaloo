@@ -1,4 +1,4 @@
-function parseQueensBoard(imageData, gridSize = 7, threshold = 40) {
+function parseQueensBoard(imageData, gridSize = 7, threshold = 20) {
     return new Promise((resolve) => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
