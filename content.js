@@ -123,7 +123,7 @@
         const targetR = 114;
         const targetG = 77;
         const targetB = 151;
-        const buffer = 30;
+        const buffer = 10;
 
         return Math.abs(r - targetR) <= buffer &&
                Math.abs(g - targetG) <= buffer &&
